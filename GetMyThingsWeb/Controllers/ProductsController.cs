@@ -19,5 +19,11 @@ namespace GetMyThingsWeb.Controllers
 
             return View(products);
         }
+
+
+        public IActionResult Create()
+        {
+            return View();
+        }
     }
 }
