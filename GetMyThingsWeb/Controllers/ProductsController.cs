@@ -1,4 +1,5 @@
-﻿using GetMyThingsWeb.Services;
+﻿using GetMyThingsWeb.Models;
+using GetMyThingsWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GetMyThingsWeb.Controllers
@@ -6,10 +7,12 @@ namespace GetMyThingsWeb.Controllers
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext db;
+        private readonly IWebHostEnvironment environment;
 
-        public ProductsController(ApplicationDbContext context)
+        public ProductsController(ApplicationDbContext context, IWebHostEnvironment environment)
         {
             this.db = context;
+            this.environment = environment;
         }
 
 
@@ -24,6 +27,47 @@ namespace GetMyThingsWeb.Controllers
         public IActionResult Create()
         {
             return View();
+        }
+
+        [HttpPost]
+        public IActionResult Create(ProductDto productDto)
+        {
+            if (productDto.ImageFile == null)
+            {
+                ModelState.AddModelError("ImageFile", "The image file is required.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(productDto);
+            }
+
+            // save the image file
+            string newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff"); 
+            newFileName += Path.GetExtension(productDto.ImageFile!.FileName); 
+
+            string imageFullPath = environment.WebRootPath + "/products/" + newFileName;
+            using (var stream = System.IO.File.Create(imageFullPath))
+            {
+                productDto.ImageFile.CopyTo(stream);
+            }
+
+            // save the new product in the database
+            Product product = new Product()
+            {
+                Name = productDto.Name,
+                Brand = productDto.Brand,
+                Category = productDto.Category,
+                Price = productDto.Price,
+                Description = productDto.Description,
+                ImageFileName = newFileName,
+                CreatedAt = DateTime.Now,
+            };
+
+            db.Products.Add(product);
+            db.SaveChanges();
+        
+            return RedirectToAction("Index", "Products");
         }
     }
 }
