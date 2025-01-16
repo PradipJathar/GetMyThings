@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GetMyThingsWeb.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GetMyThingsWeb.Services
 {
@@ -8,5 +9,7 @@ namespace GetMyThingsWeb.Services
         {
             
         }
+
+        public DbSet<Product> Products { get; set; }
     }
 }
