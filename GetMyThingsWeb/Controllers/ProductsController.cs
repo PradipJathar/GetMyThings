@@ -69,5 +69,33 @@ namespace GetMyThingsWeb.Controllers
         
             return RedirectToAction("Index", "Products");
         }
+
+
+        public IActionResult Edit(int id)
+        {
+            var product = db.Products.Find(id);
+
+            if (product == null)
+            {
+                return RedirectToAction("Index", "Products");
+            }
+
+            // create productDto from product
+            var productDto = new ProductDto()
+            {
+                Name = product.Name,
+                Brand = product.Brand,
+                Category = product.Category,
+                Price = product.Price,
+                Description = product.Description,
+            };
+
+            ViewData["ProductId"] = product.Id; 
+            ViewData["ImageFileName"] = product.ImageFileName; 
+            ViewData["CreatedAt"] = product.CreatedAt.ToString("MM/dd/yyyy");
+
+
+            return View(productDto);
+        }
     }
 }
