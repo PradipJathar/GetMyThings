@@ -8,6 +8,7 @@ namespace GetMyThingsWeb.Controllers
     {
         private readonly ApplicationDbContext db;
         private readonly IWebHostEnvironment environment;
+        private readonly int pageSize = 5;
 
         public ProductsController(ApplicationDbContext context, IWebHostEnvironment environment)
         {
@@ -16,9 +17,23 @@ namespace GetMyThingsWeb.Controllers
         }
 
 
-        public IActionResult Index()
+        public IActionResult Index(int pageIndex)
         {
-            var products = db.Products.OrderByDescending(m => m.Id).ToList();
+            IQueryable<Product> query = db.Products.OrderByDescending(m => m.Id);
+
+            if (pageIndex < 1)
+            {
+                pageIndex = 1;
+            }
+
+            decimal count = query.Count();
+            int totalPages = (int)Math.Ceiling(count / pageSize);
+            query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+           
+            var products = query.ToList();
+
+            ViewData["PageIndex"] = pageIndex;
+            ViewData["TotalPages"] = totalPages;
 
             return View(products);
         }
