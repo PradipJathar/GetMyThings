@@ -29,6 +29,7 @@ namespace GetMyThingsWeb.Controllers
             return View();
         }
 
+
         [HttpPost]
         public IActionResult Create(ProductDto productDto)
         {
@@ -148,7 +149,24 @@ namespace GetMyThingsWeb.Controllers
             db.SaveChanges(); 
             
             return RedirectToAction("Index", "Products");
+        }
 
+
+        public IActionResult Delete(int id)
+        {
+            var product = db.Products.Find(id);
+            if (product == null)
+            {
+                return RedirectToAction("Index", "Products");
+            }
+
+            string imageFullPath = environment.WebRootPath + "/products/" + product.ImageFileName; 
+            System.IO.File.Delete(imageFullPath); 
+
+            db.Products.Remove(product); 
+            db.SaveChanges(true);
+
+            return RedirectToAction("Index", "Products");
         }
     }
 }
